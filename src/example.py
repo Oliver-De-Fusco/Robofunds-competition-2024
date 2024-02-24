@@ -25,16 +25,25 @@ def trade(account, market_data, recursive_data=None):
 if __name__ == "__main__":
     # This if statement is required, all code to run the function must be located under here
 
-    # Get the most recent market data - In this case it is using yfinance
-    tradable_universe = ("USDGBP=X", "USDEUR=X", "USDAUD=X", "USDCNY=X", "USDJPY=X")
-    market_data = yfinance.download(tradable_universe, period="10d").dropna()
     
     # Initialise the portfolio to be traded
-    portfolio_1 = portfolio()
-    print(market_data[["Adj Close"]])
+    portfolio_1 = portfolio(1000)
+    # print(portfolio_1.positions["MSFT"])
+    # print(portfolio_1.positions["MSFT"]["position"])
+    # print(portfolio_1.positions["MSFT"]["contracts"])
 
-    # run the function
-    trade(portfolio_1, market_data["Adj Close"],None)
+    msft_call = optionContract("MSFT", 400, 3, datetime.datetime.now(),"call")
 
-    # Display result
+    portfolio_1.buy(msft_call, 400)
+    portfolio_1.buy(msft_call,200)
+
+    print(portfolio_1.positions["MSFT"]["contracts"])
+    # print(portfolio_1.positions)c
+
+    """apple = asset("AAPL",122)
+
+    portfolio_1.buy(apple, 500)
     print(portfolio_1.positions)
+    portfolio_1.sell(apple, 500)
+    print(portfolio_1.positions)
+"""
