@@ -5,8 +5,6 @@
 #######################################################
 
 import datetime
-from dateutil.relativedelta import relativedelta
-import numpy
 import scipy.stats as stats
 import math
 from collections import defaultdict
@@ -30,7 +28,7 @@ class portfolio:
             if isinstance(order, optionContract):
                 # Process option contracts
                 delta_time = (order.expiry - portfolio.date).days / 255
-                price = black_scholes(order, delta_time)
+                price = black_scholes_merton(order, delta_time)
                 self.open_Positions.append((order, price))
                 balance_Change = order.underlying_Asset.quantity * price
 
@@ -92,8 +90,14 @@ class optionContract:
     risk_Free_Rate: float
 
 
-def black_scholes(contract_Order, time_to_expiry):
-    """Calculates black_scholes equation for options"""
+
+def black_scholes_merton(contract_Order, time_to_expiry):
+    """Calculates black merton scholes equation for options"""
+
+    if not isinstance(contract_Order, optionContract):
+        raise TypeError("variable contract_Order is not a optionContract class")
+    if not isinstance(time_to_expiry, float):
+        raise TypeError("time_to_expiry must be a float")
 
     d_1 = (math.log(contract_Order.underlying_Asset.spot_Price/contract_Order.strike) + (contract_Order.risk_Free_Rate + (contract_Order.volatility)/2)*time_to_expiry)/(math.sqrt(contract_Order.volatility*time_to_expiry))
     d_2 = d_1 - math.sqrt(contract_Order.volatility*time_to_expiry)
@@ -107,4 +111,3 @@ def black_scholes(contract_Order, time_to_expiry):
         expected_value = contract_Order.underlying_Asset.spot_Price * stats.norm.cdf(-d_1, 0, 1)
         value_of_not_exercising = contract_Order.strike * math.exp(-contract_Order.risk_Free_Rate * time_to_expiry) * stats.norm.cdf(-d_2, 0, 1)
         return value_of_not_exercising - expected_value
-
